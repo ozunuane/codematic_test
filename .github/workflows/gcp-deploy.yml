@@ -1,11 +1,9 @@
 name: Build gcp-test Environment
 
 on:
-  pull_request:
-    types:
-      - closed
+  push:
     branches:
-      - deploy-gcp-infra
+      - '*'
 
 
 env:
