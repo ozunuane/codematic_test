@@ -36,9 +36,9 @@ jobs:
         run: terraform fmt -check
         continue-on-error: true
 
-      - name: Terraform Init
+      - name: Terraform Init 
         id: init
-        run: terraform init
+        run: terraform init --backend-config=test.conf
       
       - name: 'Terraform Init'
         uses: hashicorp/terraform-github-actions@master
@@ -47,7 +47,7 @@ jobs:
           tf_actions_subcommand: 'init'
           tf_actions_working_dir: '.'
           tf_actions_comment: true
-          args: '-var="env=dev"'
+          # args: '-var="env=dev"'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
@@ -58,7 +58,7 @@ jobs:
 
       - name: Terraform Plan
         id: plan
-        run: terraform plan -no-color
+        run: terraform plan -var-file=main.tfvars -no-color
         continue-on-error: true
 
 
