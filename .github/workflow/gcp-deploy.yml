@@ -7,10 +7,12 @@ on:
     branches:
       - master
 
+
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
   GKE_CLUSTER: ${{ secrets.GKE_CLUSTER_NAME}} # Add your cluster name here.
   GCP_ZONE: ${{ secrets.GKE_ZONE }} # Add your cluster zone here.
+
 
 
 jobs:
@@ -39,6 +41,7 @@ jobs:
             client_email:${{ secrets.GCP_PROJECT_ID }}/gcp_client_email
             client_id:${{ secrets.GCP_PROJECT_ID }}/gcp_client_id
             client_x509_cert_url:${{ secrets.GCP_PROJECT_ID }}/gcp_client_x509_cert_url
+
 
       - name: Terraform fmt
         id: fmt
