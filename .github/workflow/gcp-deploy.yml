@@ -5,7 +5,7 @@ on:
     types:
       - closed
     branches:
-      - master
+      - deploy-gcp-infra
 
 
 env:
@@ -32,17 +32,7 @@ jobs:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
       - id: 'secrets'
         uses: 'google-github-actions/get-secretmanager-secrets@v1'
-        with:
-          secrets: |-
-            gcp_private_key_id:${{ secrets.GCP_PROJECT_ID }}/gcp_private_key_id
-            gcp_project_id:${{ secrets.GCP_PROJECT_ID }}/gcp_project_id
-            private_key_id:${{ secrets.GCP_PROJECT_ID }}/gcp_private_key_id
-            private_key:${{ secrets.GCP_PROJECT_ID }}/gcp_private_key
-            client_email:${{ secrets.GCP_PROJECT_ID }}/gcp_client_email
-            client_id:${{ secrets.GCP_PROJECT_ID }}/gcp_client_id
-            client_x509_cert_url:${{ secrets.GCP_PROJECT_ID }}/gcp_client_x509_cert_url
-
-
+   
       - name: Terraform fmt
         id: fmt
         run: terraform fmt -check
