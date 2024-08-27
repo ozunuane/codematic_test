@@ -8,7 +8,6 @@ crash.log
 *.tfstate.backup
 main-local.tfvars
 # Terraform variable files containing sensitive information
-*.tfvars
 *.tfvars.json
 
 # Override files used to override variables in your Terraform setup
@@ -28,4 +27,4 @@ override.tf.json
 *.pem
 *.key
 
-#git filter-branch -f --index-filter 'git rm --cached -r --ignore-unmatch .terraform/*'
+# git filter-branch -f --index-filter 'git rm --cached -r --ignore-unmatch .terraform/*'
