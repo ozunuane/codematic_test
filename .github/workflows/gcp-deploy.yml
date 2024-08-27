@@ -6,15 +6,15 @@ on:
       - '*'
 
 env:
-  PROJECT_ID: ${{ secrets.TF_VAR_GCP_PRIVATE_KEY_ID }}
+  PROJECT_ID: ${{ secrets.TF_VAR_GCP_PROJECT_ID }}
   GKE_CLUSTER: ${{ secrets.GKE_CLUSTER_NAME }}
   GCP_ZONE: ${{ secrets.GKE_ZONE }}
-  TF_VAR_gcp_private_key_id: '${{ secrets.TF_VAR_GCP_PRIVATE_KEY_ID }}'
-  TF_VAR_gcp_project_id: '${{ secrets.TF_VAR_GCP_PROJECT_ID }}'
-  TF_VAR_gcp_private_key: '${{ secrets.TF_VAR_GCP_PRIVATE_KEY }}'
-  TF_VAR_gcp_client_email: '${{ secrets.TF_VAR_GCP_CLIENT_EMAIL }}'
-  TF_VAR_gcp_client_id: '${{ secrets.TF_VAR_GCP_CLIENT_ID }}'
-  TF_VAR_gcp_client_x509_cert_url: '${{ secrets.TF_VAR_GCP_CLIENT_X509_CERT_URL }}'
+  TF_VAR_gcp_private_key_id: ${{ secrets.TF_VAR_GCP_PRIVATE_KEY_ID }}
+  TF_VAR_gcp_project_id: ${{ secrets.TF_VAR_GCP_PROJECT_ID }}
+  TF_VAR_gcp_private_key: ${{ secrets.TF_VAR_GCP_PRIVATE_KEY }}
+  TF_VAR_gcp_client_email: ${{ secrets.TF_VAR_GCP_CLIENT_EMAIL }}
+  TF_VAR_gcp_client_id: ${{ secrets.TF_VAR_GCP_CLIENT_ID }}
+  TF_VAR_gcp_client_x509_cert_url: ${{ secrets.TF_VAR_GCP_CLIENT_X509_CERT_URL }}
 
 jobs:
   terraform:
@@ -27,10 +27,10 @@ jobs:
         uses: hashicorp/setup-terraform@v2
 
       - name: Authenticate with Google Cloud
-        id: 'auth'
-        uses: 'google-github-actions/auth@v0'
+        id: auth
+        uses: google-github-actions/auth@v0
         with:
-          credentials_json: '${{ secrets.GKE_SA }}'
+          credentials_json: ${{ secrets.GKE_SA }}
 
       - name: Terraform Format
         id: fmt
@@ -48,9 +48,9 @@ jobs:
       - name: Terraform Plan
         id: plan
         run: |
-                echo "${{ secrets.GKE_SA_PRIVATE_KEY }}" > $GOOGLE_APPLICATION_CREDENTIALS
-                && terraform plan -var-file=main.tfvars 
-                
+          echo "${{ secrets.GKE_SA }}" > $HOME/gcp_creds.json
+          export GOOGLE_APPLICATION_CREDENTIALS=$HOME/gcp_creds.json
+          terraform plan -var-file=main.tfvars
         continue-on-error: true
 
       - name: Comment on Pull Request with Terraform Results
@@ -61,7 +61,6 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            echo "${{ secrets.GKE_SA_PRIVATE_KEY }}" > $GOOGLE_APPLICATION_CREDENTIALS
             const { data: comments } = await github.rest.issues.listComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
