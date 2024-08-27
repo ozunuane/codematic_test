@@ -33,6 +33,19 @@ jobs:
         with:
           credentials_json: ${{ secrets.GKE_SA }}
 
+      - name: 'Set up Cloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v0'
+        with:
+          project_id: ${{ secrets.TF_VAR_GCP_PROJECT_ID }}
+          
+      - id: 'secrets'
+        uses: 'google-github-actions/get-secretmanager-secrets@v1'
+        with:
+          secrets: |-
+            gcp_private_key_id:${{ secrets.TF_VAR_GCP_PROJECT_ID }}/gcp_private_key
+            gcp_private_key_id:${{ secrets.TF_VAR_GCP_PROJECT_ID }}/gcp_private_key_id
+
+
       - name: Terraform Format
         id: fmt
         run: terraform fmt -check
