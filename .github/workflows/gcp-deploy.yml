@@ -25,10 +25,10 @@ jobs:
          credentials_json: '${{ secrets.GKE_SA }}'
          gcp_private_key_id: '${{ secrets.TF_VAR_GCP_PRIVATE_KEY_ID }}'
          gcp_project_id: '${{ secrets.TF_VAR_GCP_PROJECT_ID }}'
-         private_key: '${{ secrets.TF_VAR_GCP_PRIVATE_KEY_ID }}'
-         client_email: '${{ secrets.TF_VAR_GCP_CLIENT_EMAIL }}'
-         client_id: '${{ secrets.TF_VAR_GCP_CLIENT_ID }}'
-         client_x509_cert_url: '${{ secrets.TF_VAR_GCP_CLIENT_X509_CERT_URL }}'
+         gcp_private_key: '${{ secrets.TF_VAR_GCP_PRIVATE_KEY }}'
+         gcp_client_email: '${{ secrets.TF_VAR_GCP_CLIENT_EMAIL }}'
+         gcp_client_id: '${{ secrets.TF_VAR_GCP_CLIENT_ID }}'
+         gcp_client_x509_cert_url: '${{ secrets.TF_VAR_GCP_CLIENT_X509_CERT_URL }}'
 
 
       - name: Terraform fmt
