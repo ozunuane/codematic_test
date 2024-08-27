@@ -12,7 +12,7 @@ resource "google_compute_firewall" "bastion_access" {
 
   allow {
     protocol = "tcp"
-    ports    = ["22", "80", "443"]
+    ports    = ["22", "80", ]
   }
 
   target_tags = ["allow-ssh"]

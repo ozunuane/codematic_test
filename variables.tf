@@ -62,8 +62,7 @@ variable "gcp_client_x509_cert_url" {
 # }
 
 variable "vpc_cidr" {
-  description = "CIDR for the VPC."
-  default     = "100.5.0.0/16"
+
 }
 
 
@@ -78,7 +77,9 @@ variable "ip_whitelist" {
   type        = string
   default     = ""
 }
+variable "env" {
 
+}
 variable "ssh_whitelist" {
   description = "An optional list of IP addresses to whitelist ssh access."
   type        = string

@@ -18,7 +18,7 @@ resource "google_compute_subnetwork" "private" {
   secondary_ip_range {
     range_name    = "ip-services-secondary-range"
     ip_cidr_range = "10.2.0.0/20"
-  
+
   }
 }
 

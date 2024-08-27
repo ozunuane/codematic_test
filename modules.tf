@@ -7,31 +7,38 @@ module "project" {
 module "network" {
   source = "./network"
 
-  app_name       = var.app_name
+  app_name       = "${var.name}-${var.env}"
   region         = var.region
   gcp_project_id = var.gcp_project_id
 
   depends_on = [module.project]
 }
 
+########################
+### compute/vm ###
+########################
 
 module "bastion" {
   source        = "./bastion"
-  app_name      = var.app_name
+  app_name      = "${var.name}-${var.env}"
   region        = var.region
   ssh_whitelist = local.ssh_whitelist
   # config_hash             = var.config_hash
   # deployment_cache_buster = var.deployment_cache_buster
   project           = module.network.project
   network           = module.network.network
-  private_subnet    = module.network.public_subnet
+  private_subnet    = module.network.public_subnet ###  Replaced with public subnet ###
   codematic_cluster = module.kubernetes.codematic-kubernetes
   depends_on        = [module.project, module.network]
 }
 
+########################
+## kubernetes cluster ##
+########################
+
 module "kubernetes" {
   source                   = "./kubernetes"
-  name                     = var.name
+  name                     = "${var.name}-${var.env}"
   app_name                 = var.app_name
   region                   = var.region
   project                  = module.network.project
