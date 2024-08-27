@@ -56,7 +56,7 @@ module "gke-cluster" {
 
     var.k8_spot_instance_percent > 0 ? [
       {
-        name               = "spot-node-pool"
+        name               = "${var.name}-spot-node-pool"
         machine_type       = var.k8_node_instance_type
         node_locations     = "${var.region_zone},${var.region_zone_backup}"
         initial_node_count = ceil(var.k8_min_node_count * (var.k8_spot_instance_percent / 100))
