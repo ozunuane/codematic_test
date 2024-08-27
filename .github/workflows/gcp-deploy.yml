@@ -47,7 +47,10 @@ jobs:
 
       - name: Terraform Plan
         id: plan
-        run: terraform plan -var-file=main.tfvars -no-color
+        run: |
+              echo "${{ secrets.GKE_SA_PRIVATE_KEY }}" > $GOOGLE_APPLICATION_CREDENTIALS
+              terraform plan -var-file=main.tfvars -no-color
+              
         continue-on-error: true
 
       - name: Comment on Pull Request with Terraform Results
@@ -58,6 +61,7 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
+            echo "${{ secrets.GKE_SA_PRIVATE_KEY }}" > $GOOGLE_APPLICATION_CREDENTIALS
             const { data: comments } = await github.rest.issues.listComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
