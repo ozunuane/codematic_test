@@ -49,9 +49,10 @@ jobs:
       - name: Terraform Plan
         id: plan
         run: |
-          echo "$GKE_SA" > gcp_key.json 
-          export GOOGLE_APPLICATION_CREDENTIALS=gcp_key.json
-          terraform plan --var-file=env/test.tfvars -input=false
+              echo "${{ secrets.TF_VAR_gcp_private_key }}"
+              export TF_VAR_gcp_private_key="${{ secrets.TF_VAR_gcp_private_key }}"         
+              terraform workspace select test
+              terraform plan --var-file=env/test.tfvars -input=false
         continue-on-error: false
 
       - name: Comment on Pull Request with Terraform Results
@@ -137,7 +138,8 @@ jobs:
       - name: Terraform Apply
         id: plan
         run: |
-          echo "$GKE_SA" > gcp_key.json 
-          export GOOGLE_APPLICATION_CREDENTIALS=gcp_key.json
+          echo "${{ secrets.TF_VAR_gcp_private_key }}"
+          export TF_VAR_gcp_private_key="${{ secrets.TF_VAR_gcp_private_key }}"         
+          terraform workspace select test
           terraform apply -var-file=env/test.tfvars --auto-approve  -input=false
         continue-on-error: false
