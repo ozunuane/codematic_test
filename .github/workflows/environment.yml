@@ -3,7 +3,7 @@ name: Build GCP Test Environment
 on:
   push:
     branches:
-      - '*'
+      - 'deploy-infra'
 
 env:
   PROJECT_ID: ${{ secrets.TF_VAR_GCP_PROJECT_ID }}

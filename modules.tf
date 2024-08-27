@@ -22,25 +22,25 @@ module "bastion" {
   ssh_whitelist = local.ssh_whitelist
   # config_hash             = var.config_hash
   # deployment_cache_buster = var.deployment_cache_buster
-  project = module.network.project
-  network = module.network.network
+  project           = module.network.project
+  network           = module.network.network
   private_subnet    = module.network.public_subnet
   codematic_cluster = module.kubernetes.codematic-kubernetes
   depends_on        = [module.project, module.network]
 }
 
 module "kubernetes" {
-  source = "./kubernetes"
-  name = var.name
-  app_name = var.app_name
-  region   = var.region
-  project             = module.network.project
-  network             = module.network.network
-  private_subnet      = module.network.private_subnet
-  public_subnet       = module.network.public_subnet
-  region_zone         = var.region_zone
-  region_zone_backup  = var.region_zone_backup
-  authorized_networks = var.authorized_networks
+  source                   = "./kubernetes"
+  name                     = var.name
+  app_name                 = var.app_name
+  region                   = var.region
+  project                  = module.network.project
+  network                  = module.network.network
+  private_subnet           = module.network.private_subnet
+  public_subnet            = module.network.public_subnet
+  region_zone              = var.region_zone
+  region_zone_backup       = var.region_zone_backup
+  authorized_networks      = var.authorized_networks
   k8_node_instance_type    = var.k8_node_instance_type
   k8_min_node_count        = var.k8_min_node_count
   k8_max_node_count        = var.k8_max_node_count

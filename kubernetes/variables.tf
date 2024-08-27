@@ -19,7 +19,7 @@ variable "name" {
 }
 
 variable "private_subnet" {
-  
+
 }
 
 variable "public_subnet" {

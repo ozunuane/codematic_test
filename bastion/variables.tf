@@ -12,7 +12,7 @@ variable "network" {
 
 
 variable "private_subnet" {
-    description = "The private subnet in our virtual network"
+  description = "The private subnet in our virtual network"
 
 }
 variable "region" {
