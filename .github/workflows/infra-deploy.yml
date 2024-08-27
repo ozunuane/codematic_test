@@ -51,7 +51,7 @@ jobs:
         run: |
           echo "$GKE_SA" > gcp_key.json 
           export GOOGLE_APPLICATION_CREDENTIALS=gcp_key.json
-          terraform plan --var-file=environments/test.tfvars -input=false
+          terraform plan --var-file=test.tfvars -input=false
         continue-on-error: false
 
       - name: Comment on Pull Request with Terraform Results
@@ -139,5 +139,5 @@ jobs:
         run: |
           echo "$GKE_SA" > gcp_key.json 
           export GOOGLE_APPLICATION_CREDENTIALS=gcp_key.json
-          terraform apply -var-file=environments/test.tfvars --auto-approve  -input=false
+          terraform apply -var-file=test.tfvars --auto-approve  -input=false
         continue-on-error: false
