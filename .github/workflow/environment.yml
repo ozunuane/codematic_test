@@ -3,7 +3,7 @@ name: Build GCP Test Environment
 on:
   push:
     branches:
-      - 'develop-infra'
+      - '*'
 
 env:
   PROJECT_ID: ${{ secrets.TF_VAR_GCP_PROJECT_ID }}
@@ -105,40 +105,40 @@ jobs:
               });
 
 
-  terraform-apply:
-    if: github.ref == 'refs/heads/deploy-infra'
+  # terraform-apply:
+  #   if: github.ref == 'refs/heads/deploy-infra'
 
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout Code
+  #       uses: actions/checkout@v3
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
+  #     - name: Setup Terraform
+  #       uses: hashicorp/setup-terraform@v2
 
-      - name: Authenticate with Google Cloud
-        id: auth
-        uses: google-github-actions/auth@v0
-        with:
-          credentials_json: ${{ secrets.GKE_SA }}
+  #     - name: Authenticate with Google Cloud
+  #       id: auth
+  #       uses: google-github-actions/auth@v0
+  #       with:
+  #         credentials_json: ${{ secrets.GKE_SA }}
 
-      - name: Terraform Format
-        id: fmt
-        run: terraform fmt -check
-        continue-on-error: false
+  #     - name: Terraform Format
+  #       id: fmt
+  #       run: terraform fmt -check
+  #       continue-on-error: false
 
-      - name: Terraform Init
-        id: init
-        run: terraform init --backend-config=test.conf
+  #     - name: Terraform Init
+  #       id: init
+  #       run: terraform init --backend-config=test.conf
 
-      - name: Terraform Validate
-        id: validate
-        run: terraform validate -no-color
+  #     - name: Terraform Validate
+  #       id: validate
+  #       run: terraform validate -no-color
 
-      - name: Terraform Apply
-        id: plan
-        run: |
-          echo "$GKE_SA" > gcp_key.json 
-          export GOOGLE_APPLICATION_CREDENTIALS=gcp_key.json
-          terraform apply -var-file=main.tfvars --auto-approve  -input=false
-        continue-on-error: false
+  #     - name: Terraform Apply
+  #       id: plan
+  #       run: |
+  #         echo "$GKE_SA" > gcp_key.json 
+  #         export GOOGLE_APPLICATION_CREDENTIALS=gcp_key.json
+  #         terraform apply -var-file=main.tfvars --auto-approve  -input=false
+  #       continue-on-error: false
