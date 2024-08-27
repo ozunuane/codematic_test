@@ -6,7 +6,7 @@ crash.log
 # Terraform State files
 *.tfstate
 *.tfstate.backup
-
+main-local.tfvars
 # Terraform variable files containing sensitive information
 *.tfvars
 *.tfvars.json
