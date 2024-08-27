@@ -121,13 +121,13 @@ locals {
   ssh_whitelist = distinct([for value in split(",", var.ssh_whitelist) : "${trimspace(value)}${replace(value, "/", "") != value ? "" : "/32"}" if trimspace(value) != ""])
 }
 
-variable "ip_range_pods" {
+# variable "ip_range_pods" {
 
-}
+# }
 
-variable "ip_range_services" {
+# variable "ip_range_services" {
 
-}
+# }
 
 variable "name" {
 

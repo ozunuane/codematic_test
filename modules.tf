@@ -24,7 +24,7 @@ module "bastion" {
   # deployment_cache_buster = var.deployment_cache_buster
   project = module.network.project
   network = module.network.network
-  private_subnet    = module.network.private_subnet
+  private_subnet    = module.network.public_subnet
   codematic_cluster = module.kubernetes.codematic-kubernetes
   depends_on        = [module.project, module.network]
 }
