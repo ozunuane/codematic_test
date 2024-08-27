@@ -6,7 +6,7 @@ on:
       - '*'
 
 env:
-  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  PROJECT_ID: ${{ secrets.TF_VAR_GCP_PRIVATE_KEY_ID }}
   GKE_CLUSTER: ${{ secrets.GKE_CLUSTER_NAME }}
   GCP_ZONE: ${{ secrets.GKE_ZONE }}
   TF_VAR_gcp_private_key_id: '${{ secrets.TF_VAR_GCP_PRIVATE_KEY_ID }}'
