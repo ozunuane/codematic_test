@@ -73,6 +73,7 @@ variable "authorized_networks" {
   default     = []
 }
 
+
 variable "ip_whitelist" {
   description = "An optional list of IP addresses to whitelist access to for microservices with private acl."
   type        = string
@@ -102,12 +103,12 @@ variable "k8_spot_instance_percent" {
 variable "k8_min_node_count" {
   description = "The minimum number of nodes to run in the Kubernetes cluster."
   type        = number
-  default     = 5
+  default     = 1
 }
 variable "k8_max_node_count" {
   description = "The maximum number of nodes to run in the Kubernetes cluster."
   type        = number
-  default     = 100
+  default     = 2
 }
 
 
