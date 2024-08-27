@@ -17,3 +17,18 @@ resource "google_compute_firewall" "ssh" {
     ports    = ["22"]
   }
 }
+
+
+resource "google_compute_firewall" "http" {
+  name          = "${var.app_name}-bastionssh"
+  network       = var.network.self_link
+  project       = var.project
+  source_tags   = ["allow-http"]
+  target_tags   = ["allow-http"]
+  source_ranges = var.ssh_whitelist
+
+  allow {
+    protocol = "tcp"
+    ports    = ["80"]
+  }
+}
