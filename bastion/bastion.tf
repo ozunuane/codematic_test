@@ -11,6 +11,7 @@ resource "tls_private_key" "ssh-key" {
   rsa_bits  = 4096
 }
 
+
 resource "google_compute_instance" "bastion" {
   name                      = "${var.app_name}-bastion"
   machine_type              = "e2-highmem-4"
