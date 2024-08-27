@@ -60,7 +60,7 @@ module "vpc" {
       tags              = "egress-inet"
       next_hop_internet = "true"
     }
-    
+
     # {
     #     name                   = "app-proxy"
     #     description            = "route through proxy to reach app"
@@ -73,12 +73,12 @@ module "vpc" {
 }
 
 module "Nat" {
-  source = "./nat"
-  app_name = "${var.name}-network-nat"
-  vpc_cidr = var.vpc_cidr
-  region= var.region
-  gcp_project_id= var.gcp_project_id
-  network = module.vpc.network_self_link
+  source         = "./nat"
+  app_name       = "${var.name}-network-nat"
+  vpc_cidr       = var.vpc_cidr
+  region         = var.region
+  gcp_project_id = var.gcp_project_id
+  network        = module.vpc.network_self_link
 
 }
 
