@@ -64,6 +64,7 @@ resource "null_resource" "install" {
     private_key = tls_private_key.ssh-key.private_key_pem
   }
 
+
   provisioner "remote-exec" {
     inline = [
       "sudo apt-get -y update",
