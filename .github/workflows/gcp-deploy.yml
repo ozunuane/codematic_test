@@ -17,7 +17,7 @@ env:
   TF_VAR_gcp_client_x509_cert_url: ${{ secrets.TF_VAR_GCP_CLIENT_X509_CERT_URL }}
 
 jobs:
-  terraform:
+  terraform-plan:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -35,7 +35,7 @@ jobs:
       - name: Terraform Format
         id: fmt
         run: terraform fmt -check
-        continue-on-error: true
+        continue-on-error: false
 
       - name: Terraform Init
         id: init
@@ -101,58 +101,41 @@ jobs:
               });
 
 
+  terraform-apply:
+    if: github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Authenticate with Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v0
+        with:
+          credentials_json: ${{ secrets.GKE_SA }}
+
+      - name: Terraform Format
+        id: fmt
+        run: terraform fmt -check
+        continue-on-error: false
+
+      - name: Terraform Init
+        id: init
+        run: terraform init --backend-config=test.conf
+
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate -no-color
 
       - name: Terraform Apply
-        id: apply
+        id: plan
         run: |
           terraform apply -var-file=main.tfvars
         continue-on-error: false
 
-      - name: Comment on Pull Request with Terraform Results
-        uses: actions/github-script@v6
-        if: github.ref == 'refs/heads/develop'
-        env:
-          PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const { data: comments } = await github.rest.issues.listComments({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-            });
-            const botComment = comments.find(comment => {
-              return comment.user.type === 'Bot' && comment.body.includes('Terraform Format and Style');
-            });
 
-            const output = `
-            #### Terraform Format and Style 🖌 \`${{ steps.fmt.outcome }}\`
-            #### Terraform Initialization ⚙️ \`${{ steps.init.outcome }}\`
-            #### Terraform Validation 🤖 \`${{ steps.validate.outcome }}\`
-            <details><summary>Validation Output</summary>
-            \`\`\`
-            ${{ steps.validate.outputs.stdout }}
-            \`\`\`
-            </details>
-            #### Terraform Plan 📖 \`${{ steps.plan.outcome }}\`
-            <details><summary>Show Plan</summary>
-            \`\`\`
-            ${process.env.PLAN}
-            \`\`\`
-            </details>
-            *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Workflow: \`${{ github.workflow }}\`*`;
 
-            if (botComment) {
-              await github.rest.issues.updateComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                comment_id: botComment.id,
-                body: output,
-              });
-            } else {
-              await github.rest.issues.createComment({
-                issue_number: context.issue.number,
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                body: output,
-              });
+
