@@ -8,5 +8,5 @@ output "bastion" {
     public_ip   = google_compute_address.bastion.address
     private_ip  = google_compute_instance.bastion.network_interface.0.network_ip
   }
-  sensitive = true
+  sensitive = false
 }

@@ -4,16 +4,16 @@ resource "google_compute_address" "bastion" {
   region  = var.region
 }
 
-resource "google_compute_firewall" "ssh" {
-  name          = "${var.app_name}-bastionssh"
+resource "google_compute_firewall" "bastion_access" {
+  name          = "${var.app_name}-bastion-access"
   network       = var.network.self_link
   project       = var.project
-  source_tags   = ["allow-ssh"]
-  target_tags   = ["allow-ssh"]
-  source_ranges = var.ssh_whitelist
+  source_ranges = ["0.0.0.0/0"]  # Allows traffic from any IP
 
   allow {
     protocol = "tcp"
-    ports    = ["22"]
+    ports    = ["22", "80", "443"]
   }
+
+  target_tags = ["allow-ssh"]
 }

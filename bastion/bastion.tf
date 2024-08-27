@@ -22,14 +22,14 @@ resource "google_compute_instance" "bastion" {
 
   boot_disk {
     initialize_params {
-      image = "ubuntu-os-cloud/ubuntu-1804-lts"
+      image = "ubuntu-1804-bionic-v20221201"
       size  = 40
     }
   }
 
   network_interface {
     network    = var.network.self_link
-    subnetwork = var.public_subnet.name
+    subnetwork = var.private_subnet.name
 
     access_config {
       nat_ip = google_compute_address.bastion.address
@@ -67,8 +67,6 @@ resource "null_resource" "install" {
   provisioner "remote-exec" {
     inline = [
       "sudo apt-get -y update",
-      "sudo apt remove -y unattended-upgrades",
-      "sudo apt-get install -y redis-tools",
       "sudo apt-get install -y docker.io",
       "sudo -E curl -L https://github.com/docker/compose/releases/download/1.27.2/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose",
       "sudo chmod +x /usr/local/bin/docker-compose",
@@ -95,17 +93,24 @@ resource "null_resource" "install" {
   provisioner "remote-exec" {
     inline = [
       "echo \"⌛️ Installing GCP CLI\"",
-      "sudo apt-get -y update",
+      "echo '⌛️ Updating kubectl config...'",
 
-      # install dependencies
-      "sudo apt-get install -y apt-transport-https ca-certificates gnupg",
+      # Update dependencies
+      "sudo apt-get update",
+      "sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common",
+      "curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -",
+      "echo 'deb https://apt.kubernetes.io/ kubernetes-xenial main' | sudo tee /etc/apt/sources.list.d/kubernetes.list",
 
-      # install helm
-      "curl https://baltocdn.com/helm/signing.asc | sudo apt-key add -",
-      "sudo apt-get install -y apt-transport-https",
-      "echo \"deb https://baltocdn.com/helm/stable/debian/ all main\" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list",
-      "sudo apt-get update -y",
-      "sudo apt-get install -y helm",
+      # Install kubectl for x86_64
+      "curl -LO https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl",
+      "curl -LO https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl.sha256",
+      "echo \"$(cat kubectl.sha256)  kubectl\" | sha256sum --check",
+      "sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl",
+
+      #Install Kustomize
+      "curl -sfLo kustomize https://github.com/kubernetes-sigs/kustomize/releases/download/v3.1.0/kustomize_3.1.0_linux_amd64",
+      "chmod u+x ./kustomize",
+
 
       # add GCloud CLI Distribution URI as a trusted source
       "echo \"deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main\" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list",

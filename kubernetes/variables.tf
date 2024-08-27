@@ -17,13 +17,11 @@ variable "network" {
 variable "name" {
 
 }
-variable "ip_range_services" {
 
+variable "private_subnet" {
+  
 }
 
-variable "ip_range_pods" {
-
-}
 variable "public_subnet" {
   description = "The public subnet in our vpc"
 }

@@ -10,10 +10,11 @@ variable "network" {
   description = "The Virtual network  where our resources will be deployed"
 }
 
-variable "public_subnet" {
-  description = "The private subnet in our virtual network"
-}
 
+variable "private_subnet" {
+    description = "The private subnet in our virtual network"
+
+}
 variable "region" {
   description = "The region where to host Google Cloud Organization resources."
 }
