@@ -48,9 +48,9 @@ jobs:
       - name: Terraform Plan
         id: plan
         run: |
-              echo "${{ secrets.GKE_SA_PRIVATE_KEY }}" > $GOOGLE_APPLICATION_CREDENTIALS
-              terraform plan -var-file=main.tfvars -no-color
-              
+                echo "${{ secrets.GKE_SA_PRIVATE_KEY }}" > $GOOGLE_APPLICATION_CREDENTIALS
+                && terraform plan -var-file=main.tfvars 
+                
         continue-on-error: true
 
       - name: Comment on Pull Request with Terraform Results
