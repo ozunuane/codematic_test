@@ -1,7 +1,7 @@
-output "bastion" {
-  value     = module.bastion.bastion
-  sensitive = true
-}
+# output "bastion" {
+#   value     = module.bastion.bastion
+#   sensitive = true
+# }
 
 
 output "codematic-kubernetes" {

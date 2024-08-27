@@ -1,65 +1,46 @@
-name: Build gcp-test Environment
+name: Build GCP Test Environment
 
 on:
-  pull_request:
-    types:
-      - closed
+  push:
     branches:
-      - master
+      - '*'
 
 env:
-  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-  GKE_CLUSTER: ${{ secrets.GKE_CLUSTER_NAME}} # Add your cluster name here.
-  GCP_ZONE: ${{ secrets.GKE_ZONE }} # Add your cluster zone here.
-
-
+  PROJECT_ID: ${{ secrets.TF_VAR_GCP_PROJECT_ID }}
+  GKE_CLUSTER: ${{ secrets.GKE_CLUSTER_NAME }}
+  GCP_ZONE: ${{ secrets.GKE_ZONE }}
+  GKE_SA: ${{ secrets.GKE_SA }}
+  TF_VAR_gcp_private_key_id: ${{ secrets.TF_VAR_GCP_PRIVATE_KEY_ID }}
+  TF_VAR_gcp_project_id: ${{ secrets.TF_VAR_GCP_PROJECT_ID }}
+  TF_VAR_gcp_private_key: ${{ secrets.TF_VAR_GCP_PRIVATE_KEY }}
+  TF_VAR_gcp_client_email: ${{ secrets.TF_VAR_GCP_CLIENT_EMAIL }}
+  TF_VAR_gcp_client_id: ${{ secrets.TF_VAR_GCP_CLIENT_ID }}
+  TF_VAR_gcp_client_x509_cert_url: ${{ secrets.TF_VAR_GCP_CLIENT_X509_CERT_URL }}
+   
 jobs:
-  terraform:
-    if: github.event.pull_request.merged == true
+  terraform-plan:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: hashicorp/setup-terraform@v2
-      - id: 'auth'
-        uses: 'google-github-actions/auth@v0'
-        with:
-         credentials_json: '${{ secrets.GKE_SA_KEY }}'
-      - name: 'Set up Cloud SDK'
-        uses: 'google-github-actions/setup-gcloud@v0'
-        with:
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
-      - id: 'secrets'
-        uses: 'google-github-actions/get-secretmanager-secrets@v1'
-        with:
-          secrets: |-
-            gcp_private_key_id:${{ secrets.GCP_PROJECT_ID }}/gcp_private_key_id
-            gcp_project_id:${{ secrets.GCP_PROJECT_ID }}/gcp_project_id
-            private_key_id:${{ secrets.GCP_PROJECT_ID }}/gcp_private_key_id
-            private_key:${{ secrets.GCP_PROJECT_ID }}/gcp_private_key
-            client_email:${{ secrets.GCP_PROJECT_ID }}/gcp_client_email
-            client_id:${{ secrets.GCP_PROJECT_ID }}/gcp_client_id
-            client_x509_cert_url:${{ secrets.GCP_PROJECT_ID }}/gcp_client_x509_cert_url
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-      - name: Terraform fmt
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Authenticate with Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v0
+        with:
+          credentials_json: ${{ secrets.GKE_SA }}
+
+      - name: Terraform Format
         id: fmt
         run: terraform fmt -check
-        continue-on-error: true
+        continue-on-error: false
 
       - name: Terraform Init
         id: init
-        run: terraform init
-      
-      - name: 'Terraform Init'
-        uses: hashicorp/terraform-github-actions@master
-        with:
-          tf_actions_version: 0.12.13
-          tf_actions_subcommand: 'init'
-          tf_actions_working_dir: '.'
-          tf_actions_comment: true
-          args: '-var="env=dev"'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          
+        run: terraform init --backend-config=test.conf
 
       - name: Terraform Validate
         id: validate
@@ -67,64 +48,97 @@ jobs:
 
       - name: Terraform Plan
         id: plan
-        run: terraform plan -no-color
-        continue-on-error: true
+        run: |
+          echo "$GKE_SA" > gcp_key.json 
+          export GOOGLE_APPLICATION_CREDENTIALS=gcp_key.json
+          terraform plan -var-file=main.tfvars
 
+        continue-on-error: false
 
-      - uses: actions/github-script@v6
+      - name: Comment on Pull Request with Terraform Results
+        uses: actions/github-script@v6
         if: github.event_name == 'pull_request'
         env:
           PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            // 1. Retrieve existing bot comments for the PR
             const { data: comments } = await github.rest.issues.listComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.issue.number,
-            })
+            });
             const botComment = comments.find(comment => {
-              return comment.user.type === 'Bot' && comment.body.includes('Terraform Format and Style')
-            })
+              return comment.user.type === 'Bot' && comment.body.includes('Terraform Format and Style');
+            });
 
-            // 2. Prepare format of the comment
-            const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
-            #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
-            #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
+            const output = `
+            #### Terraform Format and Style 🖌 \`${{ steps.fmt.outcome }}\`
+            #### Terraform Initialization ⚙️ \`${{ steps.init.outcome }}\`
+            #### Terraform Validation 🤖 \`${{ steps.validate.outcome }}\`
             <details><summary>Validation Output</summary>
-
-            \`\`\`\n
+            \`\`\`
             ${{ steps.validate.outputs.stdout }}
             \`\`\`
-
             </details>
-
-            #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
-
+            #### Terraform Plan 📖 \`${{ steps.plan.outcome }}\`
             <details><summary>Show Plan</summary>
-
-            \`\`\`\n
+            \`\`\`
             ${process.env.PLAN}
             \`\`\`
-
             </details>
+            *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Workflow: \`${{ github.workflow }}\`*`;
 
-            *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`${{ env.tf_actions_working_dir }}\`, Workflow: \`${{ github.workflow }}\`*`;
-
-            // 3. If we have a comment, update it, otherwise create a new one
             if (botComment) {
-              github.rest.issues.updateComment({
+              await github.rest.issues.updateComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 comment_id: botComment.id,
-                body: output
-              })
+                body: output,
+              });
             } else {
-              github.rest.issues.createComment({
+              await github.rest.issues.createComment({
                 issue_number: context.issue.number,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                body: output
-              })
-            }
+                body: output,
+              });
+
+
+  terraform-apply:
+    if: github.ref == 'refs/heads/deploy-infra'
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Authenticate with Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v0
+        with:
+          credentials_json: ${{ secrets.GKE_SA }}
+
+      - name: Terraform Format
+        id: fmt
+        run: terraform fmt -check
+        continue-on-error: false
+
+      - name: Terraform Init
+        id: init
+        run: terraform init --backend-config=test.conf
+
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate -no-color
+
+      - name: Terraform Apply
+        id: plan
+        run: |
+          echo "$GKE_SA" > gcp_key.json 
+          export GOOGLE_APPLICATION_CREDENTIALS=gcp_key.json
+          terraform apply -var-file=main.tfvars --auto-approve  -input=false
+        continue-on-error: false
