@@ -9,92 +9,140 @@ env:
   PROJECT_ID: ${{ secrets.TF_VAR_GCP_PROJECT_ID }}
   GKE_CLUSTER: ${{ secrets.GKE_CLUSTER_NAME }}
   GCP_ZONE: ${{ secrets.GKE_ZONE }}
+  GKE_SA: ${{ secrets.GKE_SA }}
   TF_VAR_gcp_private_key_id: ${{ secrets.TF_VAR_GCP_PRIVATE_KEY_ID }}
   TF_VAR_gcp_project_id: ${{ secrets.TF_VAR_GCP_PROJECT_ID }}
   TF_VAR_gcp_private_key: ${{ secrets.TF_VAR_GCP_PRIVATE_KEY }}
   TF_VAR_gcp_client_email: ${{ secrets.TF_VAR_GCP_CLIENT_EMAIL }}
   TF_VAR_gcp_client_id: ${{ secrets.TF_VAR_GCP_CLIENT_ID }}
   TF_VAR_gcp_client_x509_cert_url: ${{ secrets.TF_VAR_GCP_CLIENT_X509_CERT_URL }}
-  tf_version: 'latest'
-  tf_working_dir: '.'
-
-
+  
+ 
 jobs:
-  terraform:
-    name: 'Terraform'
+  terraform-plan:
     runs-on: ubuntu-latest
     steps:
-      # - name: Set GCP environment
-      #   id: set_gcp_env
-      #   run: echo ::set-env name=BRANCH_NAME::$(echo ${GITHUB_BASE_REF#refs/heads/})
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-      - name: configure gcloud
-        id: config_gcloud
-        uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Authenticate with Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v0
         with:
-          version: "latest"
-          service_account_email: ${{ secrets.TF_VAR_GCP_CLIENT_EMAIL }}
-          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          credentials_json: ${{ secrets.GKE_SA }}
 
-      - name: checkout
-        id: checkout_code
-        uses: actions/checkout@v2
+      - name: Terraform Format
+        id: fmt
+        run: terraform fmt -check
+        continue-on-error: false
 
-      - name: set GCP project
-        id: config_project
-        run: gcloud config set project xxxx
+      - name: Terraform Init
+        id: init
+        run: terraform init --backend-config=test.conf
 
-      - name: "Decrypt key service account"
-        id: decrypt_SA
-        run: gcloud secrets versions access latest --secret=test-terraform-key --project="xxxx" 
-        working-directory: "."
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate -no-color
 
-      - name: "Terraform Init"
-        id: terraform_init
-        uses: ops18/terraform-github-actions@master
-        with:
-          tf_actions_version: ${{ env.TERRAFORM_VERSION }}
-          tf_actions_comment: "false"
-          tf_actions_working_dir: '.'
-          tf_actions_subcommand: init --terraform init --backend-config=test.conf
+      - name: Terraform Plan
+        id: plan
+        run: |
+          echo "$GKE_SA" > gcp_key.json 
+          export GOOGLE_APPLICATION_CREDENTIALS=gcp_key.json
+          terraform plan -var-file=main.tfvars
+
+        continue-on-error: false
+
+      - name: Comment on Pull Request with Terraform Results
+        uses: actions/github-script@v6
+        if: github.event_name == 'pull_request'
         env:
-          GCP_SA_KEY: ${{ secrets.GKE_SA}}
-
-      - name: "Terraform Validate"
-        id: terraform_validate
-        uses: ops18/terraform-github-actions@master
+          PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
         with:
-          tf_actions_version: ${{ env.TERRAFORM_VERSION }}
-          tf_actions_comment: "false"
-          tf_actions_working_dir: '.'
-          tf_actions_subcommand: validate
-        env:
-          GCP_SA_KEY: ${{ secrets.GKE_SA}} 
-      - name: "Terraform Plan"
-        id: terraform_plan
-        uses: ops18/terraform-github-actions@master
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const botComment = comments.find(comment => {
+              return comment.user.type === 'Bot' && comment.body.includes('Terraform Format and Style');
+            });
+
+            const output = `
+            #### Terraform Format and Style 🖌 \`${{ steps.fmt.outcome }}\`
+            #### Terraform Initialization ⚙️ \`${{ steps.init.outcome }}\`
+            #### Terraform Validation 🤖 \`${{ steps.validate.outcome }}\`
+            <details><summary>Validation Output</summary>
+            \`\`\`
+            ${{ steps.validate.outputs.stdout }}
+            \`\`\`
+            </details>
+            #### Terraform Plan 📖 \`${{ steps.plan.outcome }}\`
+            <details><summary>Show Plan</summary>
+            \`\`\`
+            ${process.env.PLAN}
+            \`\`\`
+            </details>
+            *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Workflow: \`${{ github.workflow }}\`*`;
+
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: output,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: output,
+              });
+
+
+  terraform-apply:
+    if: github.ref == 'refs/heads/develop'
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Authenticate with Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v0
         with:
-          tf_actions_version: ${{ env.TERRAFORM_VERSION }}
-          tf_actions_comment: "."
-          tf_actions_subcommand: plan -var-file=main.tfvars
-        env:
-          GCP_SA_KEY: ${{ secrets.GKE_SA}}
-          
-      - name: "Terraform Apply"
-        uses: ops18/terraform-github-actions@master
-        id: terraform_apply
-        with:
-          tf_actions_version: ${{ env.TERRAFORM_VERSION }}
-          tf_actions_comment: "false"
-          tf_actions_working_dir: '.'
-          tf_actions_subcommand: apply -var-file=main.tfvars
-        env:
-          GCP_SA_KEY: ${{ secrets.GKE_SA}}
+          credentials_json: ${{ secrets.GKE_SA }}
+
+      - name: Terraform Format
+        id: fmt
+        run: terraform fmt -check
+        continue-on-error: false
+
+      - name: Terraform Init
+        id: init
+        run: terraform init --backend-config=test.conf
+
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate -no-color
+
+      - name: Terraform Apply
+        id: plan
+        run: |
+          echo "$GKE_SA" > gcp_key.json 
+          export GOOGLE_APPLICATION_CREDENTIALS=gcp_key.json
+          terraform apply -var-file=main.tfvars
+        continue-on-error: false
 
 
-
-
-
-
- 
 
