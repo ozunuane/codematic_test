@@ -15,8 +15,8 @@ module "gke-cluster" {
   filestore_csi_driver       = false
   create_service_account     = true
   cluster_resource_labels    = { "mesh_id" : "proj-${data.google_project.project.number}" }
-  enable_private_endpoint    = true
-  enable_private_nodes       = true
+  enable_private_endpoint    = false
+  enable_private_nodes       = false
   master_ipv4_cidr_block     = "172.2.0.0/28"
   master_authorized_networks = [
 
