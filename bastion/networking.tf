@@ -6,7 +6,7 @@ resource "google_compute_address" "bastion" {
 
 resource "google_compute_firewall" "ssh" {
   name          = "${var.app_name}-bastionssh"
-  network       = var.network.self_link
+  network       = var.network
   project       = var.project
   source_tags   = ["allow-ssh"]
   target_tags   = ["allow-ssh"]
@@ -20,8 +20,8 @@ resource "google_compute_firewall" "ssh" {
 
 
 resource "google_compute_firewall" "http" {
-  name          = "${var.app_name}-bastionssh"
-  network       = var.network.self_link
+  name          = "${var.app_name}-bastionhttp"
+  network       = var.network
   project       = var.project
   source_tags   = ["allow-http"]
   target_tags   = ["allow-http"]

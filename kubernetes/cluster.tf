@@ -2,11 +2,11 @@ module "gke-cluster" {
   source                     = "terraform-google-modules/kubernetes-engine/google//modules/private-cluster"
   project_id                 = var.project
   name                       = "${var.name}-cluster"
-  kubernetes_version         = "1.22"
+  kubernetes_version         = "1.27"
   region                     = var.region
   zones                      = [var.region_zone, var.region_zone_backup]
-  network                    = var.network.name
-  subnetwork                 = var.public_subnet.name
+  network                    = var.network
+  subnetwork                 = var.public_subnet
   ip_range_pods              = var.ip_range_pods
   ip_range_services          = var.ip_range_services
   http_load_balancing        = false
@@ -25,7 +25,7 @@ module "gke-cluster" {
     #   display_name = "private subnet"
     # },
     {
-      cidr_block   = var.public_subnet.ip_cidr_range
+      cidr_block   = var.public_subnet
       display_name = "public subnet"
     }
 

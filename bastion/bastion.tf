@@ -17,19 +17,20 @@ resource "google_compute_instance" "bastion" {
   project                   = var.project
   allow_stopping_for_update = true
   tags = [
-    "allow-ssh",
+    "allow-ssh", "allow-http"
+
   ]
 
   boot_disk {
     initialize_params {
-      image = "ubuntu-os-cloud/ubuntu-1804-lts"
+      image = "ubuntu-2204-jammy-arm64-v20240801"
       size  = 40
     }
   }
 
   network_interface {
-    network    = var.network.self_link
-    subnetwork = var.public_subnet.name
+    network    = var.network
+    subnetwork = var.private_subnet
 
     access_config {
       nat_ip = google_compute_address.bastion.address

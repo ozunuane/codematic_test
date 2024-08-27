@@ -10,7 +10,7 @@ variable "network" {
   description = "The Virtual network  where our resources will be deployed"
 }
 
-variable "public_subnet" {
+variable "private_subnet" {
   description = "The private subnet in our virtual network"
 }
 
@@ -26,7 +26,7 @@ variable "ssh_whitelist" {
 
 
 variable "codematic_cluster" {
-  description = "NonCBA Kubernetes Cluster where noncba services will be deployed"
+  description = " Kubernetes Cluster where  services will be deployed"
 }
 
 

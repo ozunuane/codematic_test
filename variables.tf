@@ -11,17 +11,14 @@ variable "app_name" {
 
 variable "region" {
   description = "The region where to host Google Cloud Organization resources."
-  default     = "europe-west2"
 }
 
 variable "region_zone" {
   description = "The zone in the region where to host Google Cloud Organization resources."
-  default     = "europe-west2-a"
 }
 
 variable "region_zone_backup" {
   description = "The backup zone in the region where to host Google Cloud Organization resources."
-  default     = "europe-west2-b"
 }
 
 variable "gcp_project_id" {
@@ -63,7 +60,7 @@ variable "gcp_client_x509_cert_url" {
 
 variable "vpc_cidr" {
   description = "CIDR for the VPC."
-  default     = "100.5.0.0/16"
+  default     = "100.10.0.0/16"
 }
 
 
