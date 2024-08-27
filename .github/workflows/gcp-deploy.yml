@@ -23,14 +23,14 @@ jobs:
         uses: 'google-github-actions/auth@v0'
         with:
          credentials_json: '${{ secrets.GKE_SA }}'
-      - name: 'Set up Cloud SDK'
-        uses: 'google-github-actions/setup-gcloud@v0'
-        with:
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
+         gcp_private_key_id: '${{ secrets.TF_VAR_GCP_PRIVATE_KEY_ID }}'
+         gcp_project_id: '${{ secrets.TF_VAR_GCP_PROJECT_ID }}'
+         private_key: '${{ secrets.TF_VAR_GCP_PRIVATE_KEY_ID }}'
+         client_email: '${{ secrets.TF_VAR_GCP_CLIENT_EMAIL }}'
+         client_id: '${{ secrets.TF_VAR_GCP_CLIENT_ID }}'
+         client_x509_cert_url: '${{ secrets.TF_VAR_GCP_CLIENT_X509_CERT_URL }}'
 
-      # - id: 'secrets'
-      #   uses: 'google-github-actions/get-secretmanager-secrets@v1'
-   
+
       - name: Terraform fmt
         id: fmt
         run: terraform fmt -check
@@ -39,18 +39,7 @@ jobs:
       - name: Terraform Init 
         id: init
         run: terraform init --backend-config=test.conf
-      
-      # - name: 'Terraform Init'
-      #   uses: hashicorp/terraform-github-actions@master
-      #   with:
-      #     tf_actions_version: 0.12.13
-      #     tf_actions_subcommand: 'init'
-      #     tf_actions_working_dir: '.'
-      #     tf_actions_comment: true
-      #     # args: '-var="env=dev"'
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          
+
 
       - name: Terraform Validate
         id: validate
