@@ -6,6 +6,7 @@ ip_range_services  = "152.10.0.0/16"
 name               = "codematic-test"
 ip_whitelist       = "212.161.55.98,81.170.19.3"
 ssh_whitelist      = "212.161.55.98,81.170.19.3"
+
 # gcp_project_id           = ""
 # gcp_private_key_id       = ""
 # gcp_private_key          = ""
