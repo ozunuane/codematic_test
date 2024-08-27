@@ -3,7 +3,7 @@ name: Build GCP Test Environment
 on:
   push:
     branches:
-      - 'deploy-infra'
+      - 'deploy-plan'
 
 env:
   PROJECT_ID: ${{ secrets.TF_VAR_GCP_PROJECT_ID }}
@@ -51,6 +51,7 @@ jobs:
         run: |
           echo "$GKE_SA" > gcp_key.json 
           export GOOGLE_APPLICATION_CREDENTIALS=gcp_key.json
+          terraform workspace select test
           terraform plan -var-file=main.tfvars
 
         continue-on-error: false
@@ -140,5 +141,6 @@ jobs:
         run: |
           echo "$GKE_SA" > gcp_key.json 
           export GOOGLE_APPLICATION_CREDENTIALS=gcp_key.json
+          terraform workspace select test
           terraform apply -var-file=main.tfvars --auto-approve  -input=false
         continue-on-error: false
