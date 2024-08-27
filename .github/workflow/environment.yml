@@ -16,8 +16,7 @@ env:
   TF_VAR_gcp_client_email: ${{ secrets.TF_VAR_GCP_CLIENT_EMAIL }}
   TF_VAR_gcp_client_id: ${{ secrets.TF_VAR_GCP_CLIENT_ID }}
   TF_VAR_gcp_client_x509_cert_url: ${{ secrets.TF_VAR_GCP_CLIENT_X509_CERT_URL }}
-  
- 
+   
 jobs:
   terraform-plan:
     runs-on: ubuntu-latest
@@ -107,7 +106,7 @@ jobs:
 
 
   terraform-apply:
-    if: github.ref == 'refs/heads/develop'
+    if: github.ref == 'refs/heads/deploy-infra'
 
     runs-on: ubuntu-latest
     steps:
