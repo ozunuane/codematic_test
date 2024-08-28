@@ -60,7 +60,7 @@ module "gke" {
   project_id                 = var.gcp_project_id
   name                       = "${var.name}-cluster"
   region                     = var.region
-  zones                      =  [var.region_zone, var.region_zone_backup]
+  zones                      = [var.region_zone, var.region_zone_backup]
   network                    = module.network.name
   subnetwork                 = module.network.public_subnet_name
   ip_range_pods              = "ip-pods-secondary-range"
@@ -75,28 +75,28 @@ module "gke" {
 
   node_pools = [
     {
-      name                        = "default-node-pool"
-      machine_type                = var.k8_node_instance_type
-      node_locations              = "${var.region_zone},${var.region_zone_backup}"
-      min_count                   = 1
-      max_count                   = 100
-      local_ssd_count             = 0
-      spot                        = false
-      disk_size_gb                = 100
-      disk_type                   = "pd-standard"
-      image_type                  = "COS_CONTAINERD"
-      enable_gcfs                 = false
-      enable_gvnic                = false
-      logging_variant             = "DEFAULT"
-      auto_repair                 = true
-      auto_upgrade                = true
-      service_account             = var.gcp_client_email
-      preemptible                 = false
-      initial_node_count          = 80
+      name                       = "default-node-pool"
+      machine_type               = var.k8_node_instance_type
+      node_locations             = "${var.region_zone},${var.region_zone_backup}"
+      min_count                  = 1
+      max_count                  = 100
+      local_ssd_count            = 0
+      spot                       = false
+      disk_size_gb               = 100
+      disk_type                  = "pd-standard"
+      image_type                 = "COS_CONTAINERD"
+      enable_gcfs                = false
+      enable_gvnic               = false
+      logging_variant            = "DEFAULT"
+      auto_repair                = true
+      auto_upgrade               = true
+      service_account            = var.gcp_client_email
+      preemptible                = false
+      initial_node_count         = 80
       max_shared_clients_per_gpu = 2
-      initial_node_count = ceil(var.k8_min_node_count * (var.k8_spot_instance_percent / 100))
-      min_count          = ceil(var.k8_min_node_count * (var.k8_spot_instance_percent / 100))
-      max_count          = ceil(var.k8_max_node_count * (var.k8_spot_instance_percent / 100))
+      initial_node_count         = ceil(var.k8_min_node_count * (var.k8_spot_instance_percent / 100))
+      min_count                  = ceil(var.k8_min_node_count * (var.k8_spot_instance_percent / 100))
+      max_count                  = ceil(var.k8_max_node_count * (var.k8_spot_instance_percent / 100))
     },
   ]
 

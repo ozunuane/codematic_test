@@ -78,7 +78,7 @@ variable "ip_whitelist" {
   default     = ""
 }
 variable "env" {
-  
+
 }
 variable "ssh_whitelist" {
   description = "An optional list of IP addresses to whitelist ssh access."

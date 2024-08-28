@@ -20,7 +20,7 @@ resource "google_compute_subnetwork" "public" {
   network       = google_compute_network.codematic.id
   project       = var.gcp_project_id
 
-    secondary_ip_range {
+  secondary_ip_range {
     range_name    = "ip-pods-secondary-range"
     ip_cidr_range = "101.16.0.0/16"
   }

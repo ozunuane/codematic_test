@@ -8,7 +8,7 @@ resource "google_compute_firewall" "bastion_access" {
   name          = "${var.app_name}-bastion-access"
   network       = var.network.self_link
   project       = var.project
-  source_ranges = ["0.0.0.0/0"]  # Allows traffic from any IP
+  source_ranges = ["0.0.0.0/0"] # Allows traffic from any IP
 
   allow {
     protocol = "tcp"
