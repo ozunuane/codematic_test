@@ -1,13 +1,13 @@
-# output "bastion" {
-#   value     = module.bastion.bastion
-#   sensitive = true
-# }
-
-
-output "codematic-kubernetes" {
-  value     = module.kubernetes.codematic-kubernetes
+output "bastion" {
+  value     = module.bastion.bastion
   sensitive = true
 }
+
+
+# output "codematic-kubernetes" {
+#   value     = module.gke.codematic-kubernetes
+#   sensitive = true
+# }
 
 
 # # output "lb" {

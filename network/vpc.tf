@@ -10,14 +10,7 @@ resource "google_compute_subnetwork" "private" {
   region        = var.region
   network       = google_compute_network.codematic.id
   project       = var.gcp_project_id
-  secondary_ip_range {
-    range_name    = "ip-pods-secondary-range"
-    ip_cidr_range = "101.16.0.0/16"
-  }
-  secondary_ip_range {
-    range_name    = "ip-services-secondary-range"
-    ip_cidr_range = "102.16.0.0/16"
-  }
+
 }
 
 resource "google_compute_subnetwork" "public" {
@@ -26,6 +19,15 @@ resource "google_compute_subnetwork" "public" {
   region        = var.region
   network       = google_compute_network.codematic.id
   project       = var.gcp_project_id
+
+    secondary_ip_range {
+    range_name    = "ip-pods-secondary-range"
+    ip_cidr_range = "101.16.0.0/16"
+  }
+  secondary_ip_range {
+    range_name    = "ip-services-secondary-range"
+    ip_cidr_range = "101.17.0.0/16"
+  }
 }
 
 

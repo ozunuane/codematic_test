@@ -75,7 +75,6 @@ resource "null_resource" "install" {
       "(sudo groupadd docker || true)",
       "(sudo usermod -aG docker $USER || true)",
       "sudo chmod 666 /var/run/docker.sock",
-      "sudo apt-get -y install postgresql postgresql-contrib"
     ]
   }
 
@@ -171,8 +170,8 @@ resource "null_resource" "update" {
       "gcloud config set project ${var.project} -q",
 
       # update kubectl config
-      "gcloud container clusters get-credentials --region ${var.region} ${var.codematic_cluster.name}",
-      "kubectl config set-context codematic --cluster=${var.codematic_cluster.name} --namespace=codematic",
+      "gcloud container clusters get-credentials --region ${var.region} ${var.codematic_cluster}",
+      "kubectl config set-context codematic --cluster=${var.codematic_cluster} --namespace=codematic",
 
       "echo \"✅ Updated kubectl config.\"",
     ]
